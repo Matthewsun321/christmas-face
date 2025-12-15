@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>>
+<head>
 <meta charset="UTF-8">
-<title>Christmas Face Generator</title>
-
+<title>Christmas Face Detector Test</title>
 <style>
 body {
     background:#0b3d2e;
@@ -14,33 +13,74 @@ body {
 video, canvas {
     border:3px solid white;
     border-radius:12px;
+    margin-top:10px;
 }
 #hint {
     margin-top:12px;
     font-size:18px;
 }
 </style>
+
+<!-- 引入 face-api.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 </head>
 
 <body>
 
-<h1>🎄 圣诞老人生成器 🎅</h1>
-<p>请将人脸对准画面中央</p>
+<h1>🎄 圣诞老人人脸检测测试 🎅</h1>
+<p>请将人脸对准摄像头</p>
 
 <video id="video" width="400" height="300" autoplay muted playsinline></video>
 <canvas id="canvas" width="400" height="300"></canvas>
-<div id="hint">摄像头已启动</div>
+<div id="hint">加载中...</div>
 
 <script>
 const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const hint = document.getElementById("hint");
 
-navigator.mediaDevices.getUserMedia({ video:true })
-.then(stream=>{
+async function start() {
+    hint.innerText = "正在加载模型...";
+    // 加载 tiny_face_detector 模型
+    await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+
+    hint.innerText = "打开摄像头...";
+    const stream = await navigator.mediaDevices.getUserMedia({ video:true });
     video.srcObject = stream;
-})
-.catch(()=>{
-    alert("摄像头无法打开");
-});
+
+    video.onloadedmetadata = () => {
+        video.play();
+        hint.innerText = "摄像头已启动，开始检测...";
+        detectLoop();
+    };
+}
+
+async function detectLoop() {
+    // 清空画布
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // 检测人脸
+    const detection = await faceapi.detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions()
+    );
+
+    if (detection) {
+        const box = detection.box;
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(box.x, box.y, box.width, box.height);
+        hint.innerText = "检测到人脸！";
+    } else {
+        hint.innerText = "未检测到人脸";
+    }
+
+    requestAnimationFrame(detectLoop);
+}
+
+// 启动
+start();
 </script>
 
 </body>
