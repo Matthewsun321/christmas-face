@@ -3,58 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <title>FaceAPI Test</title>
-<style>
-body { text-align:center; background:#0b3d2e; color:white; font-family:Arial; }
-video, canvas { border:2px solid white; border-radius:10px; margin-top:10px; }
-</style>
-<!-- face-api.js -->
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 </head>
 <body>
-
-<h1>FaceAPI 加载测试</h1>
-<video id="video" width="400" height="300" autoplay muted playsinline></video>
-<canvas id="canvas" width="400" height="300"></canvas>
-<div id="hint">等待摄像头...</div>
-
+<h1>FaceAPI 测试</h1>
 <script>
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const hint = document.getElementById("hint");
-
-async function start() {
-    hint.innerText = "加载模型...";
-    // 这里一定要保证 /models 路径正确
-    await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-    hint.innerText = "打开摄像头...";
-    const stream = await navigator.mediaDevices.getUserMedia({ video:true });
-    video.srcObject = stream;
-    video.onloadedmetadata = () => {
-        video.play();
-        hint.innerText = "开始检测...";
-        detectLoop();
-    };
-}
-
-async function detectLoop() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
-    if (detection) {
-        const box = detection.box;
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 3;
-        ctx.strokeRect(box.x, box.y, box.width, box.height);
-        hint.innerText = "检测到人脸！";
+window.addEventListener('DOMContentLoaded', () => {
+    if (typeof faceapi !== 'undefined') {
+        alert("face-api.js 加载成功！");
     } else {
-        hint.innerText = "未检测到人脸";
+        alert("faceapi 未定义");
     }
-    requestAnimationFrame(detectLoop);
-}
-
-// 等 face-api.js 加载完成后再执行
-window.addEventListener('DOMContentLoaded', start);
+});
 </script>
-
 </body>
 </html>
