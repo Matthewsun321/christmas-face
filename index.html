@@ -2,37 +2,20 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Christmas Face Detector Test</title>
+<title>FaceAPI Test</title>
 <style>
-body {
-    background:#0b3d2e;
-    color:white;
-    text-align:center;
-    font-family:Arial;
-}
-video, canvas {
-    border:3px solid white;
-    border-radius:12px;
-    margin-top:10px;
-}
-#hint {
-    margin-top:12px;
-    font-size:18px;
-}
+body { text-align:center; background:#0b3d2e; color:white; font-family:Arial; }
+video, canvas { border:2px solid white; border-radius:10px; margin-top:10px; }
 </style>
-
-<!-- 引入 face-api.js -->
+<!-- face-api.js -->
 <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 </head>
-
 <body>
 
-<h1>🎄 圣诞老人人脸检测测试 🎅</h1>
-<p>请将人脸对准摄像头</p>
-
+<h1>FaceAPI 加载测试</h1>
 <video id="video" width="400" height="300" autoplay muted playsinline></video>
 <canvas id="canvas" width="400" height="300"></canvas>
-<div id="hint">加载中...</div>
+<div id="hint">等待摄像头...</div>
 
 <script>
 const video = document.getElementById("video");
@@ -41,31 +24,22 @@ const ctx = canvas.getContext("2d");
 const hint = document.getElementById("hint");
 
 async function start() {
-    hint.innerText = "正在加载模型...";
-    // 加载 tiny_face_detector 模型
+    hint.innerText = "加载模型...";
+    // 这里一定要保证 /models 路径正确
     await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-
     hint.innerText = "打开摄像头...";
     const stream = await navigator.mediaDevices.getUserMedia({ video:true });
     video.srcObject = stream;
-
     video.onloadedmetadata = () => {
         video.play();
-        hint.innerText = "摄像头已启动，开始检测...";
+        hint.innerText = "开始检测...";
         detectLoop();
     };
 }
 
 async function detectLoop() {
-    // 清空画布
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    // 检测人脸
-    const detection = await faceapi.detectSingleFace(
-        video,
-        new faceapi.TinyFaceDetectorOptions()
-    );
-
+    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
     if (detection) {
         const box = detection.box;
         ctx.strokeStyle = "red";
@@ -75,12 +49,11 @@ async function detectLoop() {
     } else {
         hint.innerText = "未检测到人脸";
     }
-
     requestAnimationFrame(detectLoop);
 }
 
-// 启动
-start();
+// 等 face-api.js 加载完成后再执行
+window.addEventListener('DOMContentLoaded', start);
 </script>
 
 </body>
