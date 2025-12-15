@@ -43,7 +43,7 @@ const hint = document.getElementById("hint");
 async function start() {
     hint.innerText = "正在加载模型...";
     // 加载 tiny_face_detector 模型
-    await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+    await faceapi.nets.tinyFaceDetector.loadFromUri("models");
 
     hint.innerText = "打开摄像头...";
     const stream = await navigator.mediaDevices.getUserMedia({ video:true });
