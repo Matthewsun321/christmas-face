@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Christmas Face Generator</title>
+    <style>
+        body {
+            background: #0b3d2e;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        video, canvas {
+            border: 3px solid white;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎄 圣诞老人生成器 🎅</h1>
+<p>请靠近摄像头，正对镜头</p>
+
+<video id="video" width="400" height="300" autoplay playsinline></video>
+<canvas id="canvas" width="400" height="300"></canvas>
+
+<script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => video.srcObject = stream)
+        .catch(() => alert("无法打开摄像头"));
+
+    setTimeout(() => {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "red";
+        ctx.fillRect(120, 0, 160, 80);
+        ctx.fillStyle = "white";
+        ctx.fillRect(120, 70, 160, 15);
+        ctx.beginPath();
+        ctx.arc(200, 220, 60, 0, Math.PI);
+        ctx.fill();
+    }, 5000);
+</script>
+
+</body>
+</html>
+
+add index.html
+
+
+
