@@ -2,19 +2,77 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>FaceAPI Test</title>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+<title>Christmas Face</title>
+
+<script defer src="face-api.js"></script>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  overflow: hidden;
+}
+video, canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#status {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  color: white;
+  font-size: 16px;
+}
+</style>
 </head>
+
 <body>
-<h1>FaceAPI 测试</h1>
+
+<video id="video" autoplay muted></video>
+<canvas id="overlay"></canvas>
+<div id="status">加载模型中...</div>
+
 <script>
-window.addEventListener('DOMContentLoaded', () => {
-    if (typeof faceapi !== 'undefined') {
-        alert("face-api.js 加载成功！");
-    } else {
-        alert("faceapi 未定义");
-    }
-});
+const video = document.getElementById("video");
+const canvas = document.getElementById("overlay");
+const ctx = canvas.getContext("2d");
+const statusText = document.getElementById("status");
+
+async function start() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri("models");
+  statusText.innerText = "模型加载完成";
+
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = stream;
+
+  video.onloadedmetadata = () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    detectLoop();
+  };
+}
+
+async function detectLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const detections = await faceapi.detectAllFaces(
+    video,
+    new faceapi.TinyFaceDetectorOptions()
+  );
+
+  detections.forEach(d => {
+    const { x, y, width, height } = d.box;
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x, y, width, height);
+  });
+
+  requestAnimationFrame(detectLoop);
+}
+
+start();
 </script>
+
 </body>
 </html>
